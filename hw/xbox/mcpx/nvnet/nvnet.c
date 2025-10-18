@@ -820,7 +820,24 @@ static void nvnet_mmio_write(void *opaque, hwaddr addr, uint64_t val,
     NvNetState *s = NVNET(opaque);
 
     trace_nvnet_reg_write(addr, get_reg_name(addr), size, val);
-    assert((addr & 3) == 0 && "Unaligned MMIO write");
+
+    /* Handle unaligned writes by reading, modifying, and writing aligned data */
+    hwaddr aligned_addr = addr & ~3;
+    unsigned int offset = addr & 3;
+
+    if (offset != 0 || size != 4) {
+        /* Handle unaligned or partial writes */
+        uint32_t aligned_val = get_reg(s, aligned_addr);
+        uint8_t *bytes = (uint8_t *)&aligned_val;
+
+        for (unsigned int i = 0; i < size; i++) {
+            bytes[offset + i] = (val >> (8 * i)) & 0xff;
+        }
+
+        val = aligned_val;
+        addr = aligned_addr;
+        size = 4;
+    }
 
     switch (addr) {
     case NVNET_MDIO_ADDR:
@@ -877,6 +894,9 @@ static void nvnet_mmio_write(void *opaque, hwaddr addr, uint64_t val,
 static const MemoryRegionOps nvnet_mmio_ops = {
     .read = nvnet_mmio_read,
     .write = nvnet_mmio_write,
+    .impl = {
+        .unaligned = true,
+    },
 };
 
 static uint64_t nvnet_io_read(void *opaque, hwaddr addr, unsigned int size)
