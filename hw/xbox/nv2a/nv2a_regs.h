@@ -57,6 +57,8 @@
 #define NV_PRAMIN       19  /* RAMIN access */
 #define NV_USER         20  /* PFIFO MMIO and DMA submission area */
 
+#define NV_NUM_GPU_TILES                                 8
+
 #define NV_PMC_BOOT_0                                    0x00000000
 #define NV_PMC_INTR_0                                    0x00000100
 #   define NV_PMC_INTR_0_PFIFO                                 (1 << 8)
@@ -471,6 +473,9 @@
 #       define NV_PGRAPH_CONTROL_2_STENCIL_OP_V_INCR                7
 #       define NV_PGRAPH_CONTROL_2_STENCIL_OP_V_DECR                8
 #define NV_PGRAPH_CONTROL_3                              0x00001958
+#   define NV_PGRAPH_CONTROL_3_PROVOKING_VERTEX                 (1 << 0)
+#       define NV_PGRAPH_CONTROL_3_PROVOKING_VERTEX_LAST            0
+#       define NV_PGRAPH_CONTROL_3_PROVOKING_VERTEX_FIRST           1
 #   define NV_PGRAPH_CONTROL_3_SHADEMODE                        (1 << 7)
 #       define NV_PGRAPH_CONTROL_3_SHADEMODE_FLAT                   0
 #       define NV_PGRAPH_CONTROL_3_SHADEMODE_SMOOTH                 1
@@ -713,6 +718,13 @@
 #define NV_PFB_CFG0                                      0x00000200
 #   define NV_PFB_CFG0_PART                                   0x00000003
 #define NV_PFB_CSTATUS                                   0x0000020C
+#define NV_PFB_TILE                                      0x00000240
+#   define NV_PFB_TILE_BASE_ADDRESS_AND_FLAGS(i)                (NV_PFB_TILE + (i) * 16)
+#       define NV_PFB_TILE_FLAGS                                    0x00003FFF
+#           define NV_PFB_TILE_FLAGS_VALID                              1
+#       define NV_PFB_TILE_BASE_ADDRESS                             0x03FFC000
+#   define NV_PFB_TILE_LIMIT(i)                                 (NV_PFB_TILE + (i) * 16 + 4)
+#   define NV_PFB_TILE_PITCH(i)                                 (NV_PFB_TILE + (i) * 16 + 8)
 #define NV_PFB_WBC                                       0x00000410
 #   define NV_PFB_WBC_FLUSH                                     (1 << 16)
 
@@ -1046,7 +1058,7 @@
 #   define NV097_SET_TEXGEN_Q                                 0x000003CC
 #   define NV097_SET_TEXTURE_MATRIX_ENABLE                    0x00000420
 #   define NV097_SET_POINT_SIZE                               0x0000043C
-#        define NV097_SET_POINT_SIZE_V                            0x000001FF
+#       define NV097_SET_POINT_SIZE_V_MAX                          0x1FF
 #   define NV097_SET_PROJECTION_MATRIX                        0x00000440
 #   define NV097_SET_MODEL_VIEW_MATRIX                        0x00000480
 #   define NV097_SET_INVERSE_MODEL_VIEW_MATRIX                0x00000580
@@ -1062,6 +1074,9 @@
 #       define NV097_SET_TEXGEN_VIEW_MODEL_INFINITE_VIEWER        1
 #   define NV097_SET_FOG_PLANE                                0x000009D0
 #   define NV097_SET_SPECULAR_PARAMS                          0x000009E0
+#   define NV097_SET_PROVOKING_VERTEX                         0x000009FC
+#       define NV097_SET_PROVOKING_VERTEX_LAST                    0
+#       define NV097_SET_PROVOKING_VERTEX_FIRST                   1
 #   define NV097_SET_SCENE_AMBIENT_COLOR                      0x00000A10
 #   define NV097_SET_VIEWPORT_OFFSET                          0x00000A20
 #   define NV097_SET_POINT_PARAMS                             0x00000A30
